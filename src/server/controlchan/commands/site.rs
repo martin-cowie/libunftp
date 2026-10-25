@@ -28,18 +28,17 @@ impl Site {
         Storage: StorageBackend<User> + 'static,
         Storage::Metadata: Metadata,
     {
-        let (username, storage, user, cwd) = {
-            let session = context.session.lock().await;
-            (session.username.clone(), session.storage.clone(), session.user.clone(), session.cwd.clone())
-        };
+        let session = context.session.lock().await;
         SiteCommandContext {
             command: self.command.clone(),
             arguments: self.arguments.clone(),
-            username,
-            storage,
-            user,
+            username: session.username.clone(),
+            storage: session.storage.clone(),
+            user: session.user.clone(),
             logger: context.logger.clone(),
-            cwd,
+            cwd: session.cwd.clone(),
+            source_ip: session.control_connection.map_or(session.source, |pair| pair.source).ip(),
+            trace_id: session.trace_id.to_string(),
         }
     }
 }

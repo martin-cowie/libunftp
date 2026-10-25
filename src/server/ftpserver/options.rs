@@ -206,6 +206,12 @@ where
     /// The session's current working directory, as set by `CWD` and `CDUP`. Resolve relative paths
     /// in [`arguments`](Self::arguments) against it, as the built-in commands do.
     pub cwd: PathBuf,
+    /// The IP address of the client. In proxy protocol mode this is the client's address as
+    /// reported by the proxy, not the proxy's own address.
+    pub source_ip: IpAddr,
+    /// Identifies the session in log statements and in
+    /// [`EventMeta::trace_id`](crate::notification::EventMeta::trace_id).
+    pub trace_id: String,
 }
 
 impl<Storage, User> SiteCommandContext<Storage, User>
@@ -216,8 +222,9 @@ where
 {
     /// Creates a context, for example to unit test a [`SiteCommandHandler`].
     ///
-    /// The remaining fields describe a session with no authenticated user whose working directory
-    /// is `/`. Assign them directly to describe a different session.
+    /// The remaining fields describe a session with no authenticated user, a working directory of
+    /// `/`, an unspecified source IP address and an empty trace ID. Assign them directly to describe
+    /// a different session.
     ///
     /// # Parameters
     ///
@@ -250,6 +257,8 @@ where
             user: Arc::new(None),
             logger,
             cwd: PathBuf::from("/"),
+            source_ip: IpAddr::V4(Ipv4Addr::UNSPECIFIED),
+            trace_id: String::new(),
         }
     }
 }
@@ -266,6 +275,8 @@ where
             .field("arguments", &self.arguments)
             .field("username", &self.username)
             .field("cwd", &self.cwd)
+            .field("source_ip", &self.source_ip)
+            .field("trace_id", &self.trace_id)
             .finish_non_exhaustive()
     }
 }
