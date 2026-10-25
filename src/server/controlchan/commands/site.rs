@@ -28,9 +28,9 @@ impl Site {
         Storage: StorageBackend<User> + 'static,
         Storage::Metadata: Metadata,
     {
-        let (username, storage, user) = {
+        let (username, storage, user, cwd) = {
             let session = context.session.lock().await;
-            (session.username.clone(), session.storage.clone(), session.user.clone())
+            (session.username.clone(), session.storage.clone(), session.user.clone(), session.cwd.clone())
         };
         SiteCommandContext {
             command: self.command.clone(),
@@ -39,6 +39,7 @@ impl Site {
             storage,
             user,
             logger: context.logger.clone(),
+            cwd,
         }
     }
 }
